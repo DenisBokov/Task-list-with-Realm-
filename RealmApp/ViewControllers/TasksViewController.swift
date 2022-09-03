@@ -68,30 +68,25 @@ class TasksViewController: UITableViewController {
             isDone(true)
         }
         
+        let doneTitle = indexPath.section == 0 ? "Done" : "Undone"
         
-        let doneAction = UIContextualAction(style: .normal, title: "Done") { _, _, isDone in
+        let doneAction = UIContextualAction(style: .normal, title: doneTitle) { [weak self] _, _, isDone in
             StorageManager.shared.done(task)
-//            tableView.reloadRows(at: [indexPath], with: .automatic)
-            tableView.reloadData()
+            let currentTaskIndex = IndexPath(row: self?.currentTasks.index(of: task) ?? 0, section: 0)
+            let completedTaskIndex = IndexPath(row: self?.currentTasks.index(of: task) ?? 0, section: 1)
+            
+            let destinationTaskIndex = indexPath.section == 0 ? completedTaskIndex : currentTaskIndex
+            
+            tableView.moveRow(at: indexPath, to: destinationTaskIndex)
+            
             isDone(true)
         }
         
-        let backAction = UIContextualAction(style: .normal, title: "Back") { _, _, isDone in
-            StorageManager.shared.back(task)
-//            tableView.reloadRows(at: [indexPath], with: .automatic)
-            tableView.reloadData()
-            isDone(true)
-        }
         
         editAction.backgroundColor = .orange
         doneAction.backgroundColor = #colorLiteral(red: 0.3411764801, green: 0.6235294342, blue: 0.1686274558, alpha: 1)
         
-        return UISwipeActionsConfiguration(actions: [
-            indexPath.section == 0 ? doneAction : backAction,
-            editAction,
-            deleteAction
-        ]
-        )
+        return UISwipeActionsConfiguration(actions: [doneAction, editAction, deleteAction])
     }
     
     @objc private func addButtonPressed() {
